@@ -8,7 +8,7 @@ import reactor.core.publisher.Mono;
 public interface OrderService {
     
     public Mono<OrderBoundary> createOrUpdateOrder(OrderBoundary orderBoundary);
-
+    public Mono<Void> fulfillOrder(OrderBoundary orderBoundary);
     
     public Mono<Void> cleanup();
 

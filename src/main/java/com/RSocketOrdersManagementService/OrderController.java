@@ -27,9 +27,14 @@ public class OrderController {
 
 	@MessageMapping("order-req-resp")
 	public Mono<OrderBoundary> createOrUpdateOrder(OrderBoundary orderBoundary) {
-
+		System.err.println("in controller, products = " + orderBoundary.getProducts());
 		return this.orderService.createOrUpdateOrder(orderBoundary);
 
+	}
+
+	@MessageMapping("fulfill-fire-and-forget")
+	public Mono<Void> fulfillOrder(OrderBoundary orderBoundary) {
+		return this.orderService.fulfillOrder(orderBoundary);
 	}
 
 
