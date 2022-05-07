@@ -1,0 +1,19 @@
+order-req-resp
+
+java -jar rsc-0.9.1.jar --debug --request --data "{\"userEmail\":\"user@s.afeka.ac.il\", \"products\": [{\"productId\":\"1\", \"quantity\":5}, {\"productId\":\"2\", \"quantity\":10}]}" --route order-req-resp tcp://localhost:7000
+
+
+java -jar rsc-0.9.1.jar --debug --request --data "{\"userEmail\":\"user@s.afeka.ac.il\", \"products\": [{\"productId\":\"1\", \"quantity\":3}, {\"productId\":\"2\", \"quantity\":-11}, {\"productId\":\"3\", \"quantity\":5}]}" --route order-req-resp tcp://localhost:7000
+
+
+java -jar rsc-0.9.1.jar --debug --request --data "{\"userEmail\":\"user@s.afeka.ac.il\", \"products\": [{\"productId\":\"1\", \"quantity\":0}, {\"productId\":\"2\", \"quantity\":10}, {\"productId\":\"3\", \"quantity\":-5}]}" --route order-req-resp tcp://localhost:7000
+
+
+java -jar rsc-0.9.1.jar --debug --request --data "{\"userEmail\":\"user@s.afeka.ac.il\", \"products\": [{\"productId\":\"1\", \"quantity\":-8}, {\"productId\":\"2\", \"quantity\":-3}, {\"productId\":\"3\", \"quantity\":0}]}" --route order-req-resp tcp://localhost:7000
+
+
+
+
+cleanup-fire-and-forget
+
+java -jar rsc-0.9.1.jar --debug --fnf --route cleanup-fire-and-forget tcp://localhost:7000
