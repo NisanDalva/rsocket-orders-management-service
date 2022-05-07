@@ -12,6 +12,10 @@ java -jar rsc-0.9.1.jar --debug --request --data "{\"userEmail\":\"user@s.afeka.
 java -jar rsc-0.9.1.jar --debug --request --data "{\"userEmail\":\"user@s.afeka.ac.il\", \"products\": [{\"productId\":\"1\", \"quantity\":-8}, {\"productId\":\"2\", \"quantity\":-3}, {\"productId\":\"3\", \"quantity\":0}]}" --route order-req-resp tcp://localhost:7000
 
 
+java -jar rsc-0.9.1.jar --debug --request --data "{\"userEmail\":\"user@s.afeka.ac.il\", \"products\": [{\"productId\":\"2\", \"quantity\":-7}]}" --route order-req-resp tcp://localhost:7000
+
+
+
 
 fulfill-fire-and-forget
 

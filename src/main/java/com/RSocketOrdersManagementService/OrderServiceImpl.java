@@ -26,66 +26,56 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public Mono<OrderBoundary> createOrUpdateOrder(OrderBoundary orderBoundary) {
 
-        return isOrderExists(orderBoundary)
-                .flatMap(bool -> {
-                    if (bool) // exist
-                        return updateOrder(orderBoundary);
-
-                    return createOrder(orderBoundary);
-                })
+        return this.orderDao
+                .findByUserEmail(orderBoundary.getUserEmail())
+                .map(entity -> updateEntity(entity, orderBoundary))
+                .switchIfEmpty(createOrder(orderBoundary))
                 .flatMap(this.orderDao::save)
                 .map(this::entityToBoundary)
                 .log();
     }
 
-    private Mono<Boolean> isOrderExists(OrderBoundary order) {
-        return this.orderDao.findByUserEmail(order.getUserEmail())
-                .hasElement()
-                .log();
+    private OrderEntity updateEntity(OrderEntity orderEntity, OrderBoundary orderBoundary) {
+        
+        List<Product> existingProducts = orderEntity.getProducts();
+
+        orderBoundary.getProducts()
+                .forEach(p -> {
+                    int index = findIndexByProductId(existingProducts, p);
+
+                    if (index >= 0) { // product exist, update the product itself
+                        Product productToUpdate = existingProducts.get(index);
+
+                        productToUpdate.setQuantity(productToUpdate.getQuantity() + p.getQuantity());
+
+                        if (productToUpdate.getQuantity() <= 0)
+                            existingProducts.remove(productToUpdate);
+                        else
+                            existingProducts.set(index, productToUpdate);
+
+                    } else { // add a new product
+                        if (p.getQuantity() > 0)
+                            existingProducts.add(p);
+                    }
+
+                });
+
+        orderEntity.setProducts(existingProducts);
+        return orderEntity;
     }
 
     private Mono<OrderEntity> createOrder(OrderBoundary orderBoundary) {
-        orderBoundary.setCreatedTimestamp(new Date());
 
-        orderBoundary.getProducts()
-                .removeIf(p -> p.getQuantity() <= 0);
+        return Mono.just(boundaryToEntity(orderBoundary))
+                .map(order -> {
+                    System.err.println("in createOrder in map");
+                    order.setCreatedTimestamp(new Date());
 
-        return Mono.just(boundaryToEntity(orderBoundary));
-    }
+                    order.getProducts()
+                            .removeIf(p -> p.getQuantity() <= 0);
 
-    private Mono<OrderEntity> updateOrder(OrderBoundary orderBoundary) {
-        return this.orderDao
-                .findByUserEmail(orderBoundary.getUserEmail())
-                .map(entity -> {
-                    List<Product> existingProducts = entity.getProducts();
-                    List<Product> newProducts = orderBoundary.getProducts();
-                    System.err.println("in updateOrder, newProducts = " + orderBoundary.getProducts());
-
-                    for (Product p : newProducts) {
-
-                        int index = findIndexByProductId(existingProducts, p);
-
-                        if (index >= 0) { // product exist, update the product itself
-                            Product productToUpdate = existingProducts.get(index);
-
-                            productToUpdate.setQuantity(productToUpdate.getQuantity() + p.getQuantity());
-
-                            if (productToUpdate.getQuantity() <= 0)
-                                existingProducts.remove(productToUpdate);
-                            else
-                                existingProducts.set(index, productToUpdate);
-
-                        } else { // add a new product
-                            if (p.getQuantity() > 0)
-                                existingProducts.add(p);
-                        }
-
-                    }
-
-                    entity.setProducts(existingProducts);
-                    return entity;
-                })
-                .log();
+                    return order;
+                });
     }
 
     private int findIndexByProductId(List<Product> products, Product product) {
@@ -99,23 +89,19 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public Mono<Void> fulfillOrder(OrderBoundary orderBoundary) {
-        
+
         return this.orderDao
-            .findByUserEmail(orderBoundary.getUserEmail())
-            .map(order -> {
-                if (order.getFulfilledTimestamp() == null)
-                    order.setFulfilledTimestamp(new Date());
+                .findByUserEmail(orderBoundary.getUserEmail())
+                .map(order -> {
+                    if (order.getFulfilledTimestamp() == null)
+                        order.setFulfilledTimestamp(new Date());
 
-                return order;
-            })
-            .flatMap(this.orderDao::save)
-            .map(this::entityToBoundary)
-            .log()
-            .then()
-            ;
-
-
-        // return null;
+                    return order;
+                })
+                .flatMap(this.orderDao::save)
+                .map(this::entityToBoundary)
+                .log()
+                .then();
     }
 
     @Override
