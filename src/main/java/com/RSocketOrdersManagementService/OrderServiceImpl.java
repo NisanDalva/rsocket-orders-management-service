@@ -98,6 +98,27 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    public Mono<Void> fulfillOrder(OrderBoundary orderBoundary) {
+        
+        return this.orderDao
+            .findByUserEmail(orderBoundary.getUserEmail())
+            .map(order -> {
+                if (order.getFulfilledTimestamp() == null)
+                    order.setFulfilledTimestamp(new Date());
+
+                return order;
+            })
+            .flatMap(this.orderDao::save)
+            .map(this::entityToBoundary)
+            .log()
+            .then()
+            ;
+
+
+        // return null;
+    }
+
+    @Override
     public Mono<Void> cleanup() {
         return this.orderDao
                 .deleteAll()
@@ -122,35 +143,14 @@ public class OrderServiceImpl implements OrderService {
         OrderBoundary boundary = null;
 
         try {
-            String boundaryString = this.mapper.writeValueAsString(orderEntity);
-            boundary = this.mapper.readValue(boundaryString, OrderBoundary.class);
+            String entityString = this.mapper.writeValueAsString(orderEntity);
+            boundary = this.mapper.readValue(entityString, OrderBoundary.class);
 
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
 
         return boundary;
-    }
-
-    @Override
-    public Mono<Void> fulfillOrder(OrderBoundary orderBoundary) {
-        
-        return this.orderDao
-            .findByUserEmail(orderBoundary.getUserEmail())
-            .map(order -> {
-                if (order.getFulfilledTimestamp() == null)
-                    order.setFulfilledTimestamp(new Date());
-
-                return order;
-            })
-            .flatMap(this.orderDao::save)
-            .map(this::entityToBoundary)
-            .log()
-            .then()
-            ;
-
-
-        // return null;
     }
 
 }

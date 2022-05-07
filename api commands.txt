@@ -13,6 +13,18 @@ java -jar rsc-0.9.1.jar --debug --request --data "{\"userEmail\":\"user@s.afeka.
 
 
 
+fulfill-fire-and-forget
+
+java -jar rsc-0.9.1.jar --debug --fnf --data "{\"userEmail\":\"user@s.afeka.ac.il\"}" --route fulfill-fire-and-forget tcp://localhost:7000
+
+java -jar rsc-0.9.1.jar --debug --fnf --data "{\"userEmail\":\"user1@s.afeka.ac.il\"}" --route fulfill-fire-and-forget tcp://localhost:7000
+
+java -jar rsc-0.9.1.jar --debug --fnf --data "{}" --route fulfill-fire-and-forget tcp://localhost:7000
+
+java -jar rsc-0.9.1.jar --debug --fnf --route fulfill-fire-and-forget tcp://localhost:7000
+
+
+
 
 cleanup-fire-and-forget
 
