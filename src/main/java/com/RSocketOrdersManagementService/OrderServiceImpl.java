@@ -1,7 +1,9 @@
 package com.RSocketOrdersManagementService;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Stream;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -9,6 +11,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Service
@@ -36,7 +39,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     private OrderEntity updateEntity(OrderEntity orderEntity, OrderBoundary orderBoundary) {
-        
+
         List<Product> existingProducts = orderEntity.getProducts();
 
         orderBoundary.getProducts()
@@ -102,6 +105,32 @@ public class OrderServiceImpl implements OrderService {
                 .map(this::entityToBoundary)
                 .log()
                 .then();
+    }
+
+    @Override
+    public Flux<OrderItemBoundary> getOpenOrderItems(UserBoundary user) {
+
+        return this.orderDao
+                .findAllByUserEmailAndFulfilledTimestampIsNull(user.getUserEmail())
+                .map(entity -> {
+
+                    return entity.getProducts()
+                            .stream()
+                            .map(product -> {
+
+                                OrderItemBoundary item = new OrderItemBoundary();
+
+                                item.setOrderId(entity.getOrderId());
+                                item.setProductId(product.getProductId());
+                                item.setQuantity(product.getQuantity());
+
+                                return item;
+
+                            })
+                            .toList();
+                })
+                .flatMap(iterable -> Flux.fromIterable(iterable))
+                .log();
     }
 
     @Override

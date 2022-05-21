@@ -30,6 +30,13 @@ java -jar rsc-0.9.1.jar --debug --fnf --route fulfill-fire-and-forget tcp://loca
 
 
 
+getOpenOrderItems-stream
+
+java -jar rsc-0.9.1.jar --debug --stream --data "{\"userEmail\": \"user@s.afeka.ac.il\"}" --route getOpenOrderItems-stream tcp://localhost:7000
+
+
+
+
 cleanup-fire-and-forget
 
 java -jar rsc-0.9.1.jar --debug --fnf --route cleanup-fire-and-forget tcp://localhost:7000

@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.stereotype.Controller;
 
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Controller
@@ -31,6 +32,16 @@ public class OrderController {
 	@MessageMapping("fulfill-fire-and-forget")
 	public Mono<Void> fulfillOrder(OrderBoundary orderBoundary) {
 		return this.orderService.fulfillOrder(orderBoundary);
+	}
+
+
+	@MessageMapping("getOpenOrderItems-stream")
+	public Flux<OrderItemBoundary> getOpenOrderItems(UserBoundary user) {
+
+
+
+		return this.orderService.getOpenOrderItems(user);
+		// return null;
 	}
 
 
