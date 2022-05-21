@@ -1,9 +1,7 @@
 package com.RSocketOrdersManagementService;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Stream;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -132,6 +130,46 @@ public class OrderServiceImpl implements OrderService {
                 .flatMap(iterable -> Flux.fromIterable(iterable))
                 .log();
     }
+
+    @Override
+    public Flux<OrderBoundary> getOrders(UserBoundary user) {
+
+        return this.orderDao
+            .findAllByUserEmailWithoutProducts(user.getUserEmail())
+            .map(this::entityToBoundary)
+            .log();
+    }
+
+    @Override
+    public Flux<OrderItemBoundary> getItemsByOrder(Flux<OrderBoundary> boundaries) {
+
+        return boundaries
+            .flatMap(order -> {
+
+                return this.orderDao
+                    .findAllByOrderId(order.getOrderId())
+                    .map(entity -> {
+                        return entity.getProducts()
+                            .stream()
+                            .map(product -> {
+
+                                OrderItemBoundary item = new OrderItemBoundary();
+
+                                item.setOrderId(entity.getOrderId());
+                                item.setProductId(product.getProductId());
+                                item.setQuantity(product.getQuantity());
+
+                                return item;
+
+                            })
+                            .toList();
+                    })
+                    .flatMap(iterable -> Flux.fromIterable(iterable))
+                    .log();
+            })
+            .log();
+    }
+
 
     @Override
     public Mono<Void> cleanup() {
