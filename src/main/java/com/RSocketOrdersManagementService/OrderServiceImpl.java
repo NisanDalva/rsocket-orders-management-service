@@ -69,7 +69,6 @@ public class OrderServiceImpl implements OrderService {
 
         return Mono.just(boundaryToEntity(orderBoundary))
                 .map(order -> {
-                    System.err.println("in createOrder in map");
                     order.setCreatedTimestamp(new Date());
 
                     order.getProducts()

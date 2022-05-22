@@ -22,7 +22,6 @@ public class OrderController {
 
 	@MessageMapping("order-req-resp")
 	public Mono<OrderBoundary> createOrUpdateOrder(OrderBoundary orderBoundary) {
-		System.err.println("in controller, products = " + orderBoundary.getProducts());
 		return this.orderService.createOrUpdateOrder(orderBoundary);
 	}
 
